@@ -1,0 +1,148 @@
+<div class="tasks-container">
+  <!-- Header -->
+  <header class="tasks-header">
+    <div class="header-content">
+      <h1>My Tasks</h1>
+      <p class="subtitle">Stay organized and track your progress</p>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="tasks-main">
+    <!-- Add Task Form -->
+    <section class="add-task-section">
+      <h2 class="section-title">Add New Task</h2>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="task-form">
+        <div class="form-group">
+          <label for="title" class="form-label">Task Title *</label>
+          <input 
+            id="title"
+            type="text"
+            formControlName="title" 
+            placeholder="What needs to be done?" 
+            class="form-input"
+          />
+          <div *ngIf="form.controls['title'].invalid && form.controls['title'].touched" class="error-message">
+            <span *ngIf="form.controls['title'].errors?.['required']">Title is required.</span>
+            <span *ngIf="form.controls['title'].errors?.['scriptsNotAllowed']">Scripts are not allowed.</span>
+            <span *ngIf="form.controls['title'].errors?.['maxlength']">Title is too long.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description" class="form-label">Description</label>
+          <textarea 
+            id="description"
+            formControlName="description" 
+            placeholder="Add more details about your task..." 
+            class="form-input form-textarea"
+            rows="3"
+          ></textarea>
+          <div *ngIf="form.controls['description'].invalid && form.controls['description'].touched" class="error-message">
+            <span *ngIf="form.controls['description'].errors?.['scriptsNotAllowed']">Scripts are not allowed.</span>
+            <span *ngIf="form.controls['description'].errors?.['maxlength']">Description is too long.</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="priority" class="form-label">Priority *</label>
+            <select formControlName="priority" id="priority" class="form-input">
+              <option value="">Select priority</option>
+              <option value="1">Low (1)</option>
+              <option value="2">Medium (2)</option>
+              <option value="3">High (3)</option>
+              <option value="4">Very High (4)</option>
+              <option value="5">Critical (5)</option>
+            </select>
+            <div *ngIf="form.controls['priority'].invalid && form.controls['priority'].touched" class="error-message">
+              Priority must be between 1 and 5.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="dueDate" class="form-label">Due Date *</label>
+            <input 
+              id="dueDate"
+              type="date" 
+              formControlName="dueDate" 
+              class="form-input"
+            />
+            <div *ngIf="form.controls['dueDate'].invalid && form.controls['dueDate'].touched" class="error-message">
+              Due date is required.
+            </div>
+          </div>
+        </div>
+
+       <button 
+  type="submit" 
+  [disabled]="form.invalid"
+  class="btn btn-primary"
+>
+  <span>{{ editId ? 'Update Task' : 'Add Task' }}</span>
+</button>
+
+      </form>
+    </section>
+
+    <!-- Tasks List -->
+    <section class="tasks-list-section">
+      <div class="list-header">
+        <h2 class="section-title">Tasks</h2>
+        <span class="task-count">{{ (tasks$ | async)?.length || 0 }} tasks</span>
+      </div>
+
+      <ng-container *ngIf="tasks$ | async as tasks">
+        <div *ngIf="tasks.length === 0" class="empty-state">
+          <p>No tasks yet. Create one to get started!</p>
+        </div>
+
+        <ul class="tasks-list" *ngIf="tasks.length > 0">
+          <li *ngFor="let task of tasks" class="task-item" [class.completed]="task.completed">
+            <div class="task-content">
+              <div class="task-header">
+                <span class="task-title" [class.completed]="task.completed">{{ task.title }}</span>
+                <span class="priority-badge" [attr.data-priority]="task.priority">Priority {{ task.priority }}</span>
+              </div>
+              <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
+              <div class="task-meta">
+                <span class="due-date">
+                  <span class="icon">📅</span>
+                  Due: {{ task.dueDate | date: 'MMM dd, yyyy' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="task-actions">
+              <button 
+                (click)="toggle(task.id)"
+                class="btn btn-action btn-toggle"
+                [attr.aria-label]="task.completed ? 'Mark as incomplete' : 'Mark as complete'"
+                [title]="task.completed ? 'Mark as incomplete' : 'Mark as complete'">
+                <span class="icon" *ngIf="!task.completed">☐</span>
+                <span class="icon" *ngIf="task.completed">☑</span>
+                <span class="btn-text">{{ task.completed ? 'Undo' : 'Done' }}</span>
+              </button>
+              <button 
+                (click)="edit(task)"
+                class="btn btn-action btn-edit"
+                aria-label="Edit task"
+                title="Edit task">
+                <span class="icon">✎</span>
+                <span class="btn-text">Edit</span>
+              </button>
+              <button 
+                (click)="delete(task.id)"
+                class="btn btn-action btn-delete"
+                aria-label="Delete task"
+                title="Delete task">
+                <span class="icon">🗑</span>
+                <span class="btn-text">Delete</span>
+              </button>
+            </div>
+          </li>
+        </ul>
+      </ng-container>
+    </section>
+  </main>
+</div>
